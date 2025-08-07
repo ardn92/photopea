@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Photopea Plugin</title>
+  <title>Amirs Photopea Plugin</title>
   <style>
     body {
       display: flex;
@@ -11,23 +11,44 @@
       justify-content: center;
       min-height: 100vh;
       margin: 0;
-      background: #f9f9f9;
       font-family: sans-serif;
     }
     h1 {
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       color: #333;
     }
     img {
-      width: 180px;
+      width: 120px;
       height: auto;
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      margin-bottom: 24px;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>This is a Photopea Plugin test</h1>
-  <img src="assets/amir.jpg" alt="Plugin Icon">
+  <h1>Amirs Photopea Plugin</h1>
+  <img src="assets/icon.png" alt="Plugin Icon">
+  <button id="grayscale">Grayscale Image</button>
+
+  <script>
+    // Listen for initialization message from Photopea
+    window.addEventListener("message", function(e) {
+      if (e.data === "done") {
+        console.log("Photopea is ready");
+      }
+    });
+
+    document.getElementById("grayscale").onclick = function() {
+      // Script to convert active layer to grayscale
+      const script = `
+        app.activeDocument.activeLayer.adjustHueSaturation(0, -100, 0);
+      `;
+      window.parent.postMessage(script, "*");
+    };
+  </script>
 </body>
 </html>
