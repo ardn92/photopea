@@ -58,10 +58,6 @@
         }
       `;
       window.parent.postMessage(script, "*");
-    };
-
-    document.getElementById("postBtn").onclick = () => {
-      expectingImage = "post";
       window.parent.postMessage(`
         app.activeDocument.saveToOE("png");
       `, "*");
