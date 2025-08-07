@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Amirs Plugin — Load, Grid, Post</title>
+  <title>Amirs Plugin — Load, Grid, External Process</title>
   <style>
     body { font-family: sans-serif; margin: 10px; display: flex; flex-direction: column; align-items: center; }
     button { margin: 5px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
@@ -14,16 +14,16 @@
   <button id="loadBtn">Load Image</button>
   <img id="imgArea" alt="Loaded Image">
   <button id="gridBtn" disabled>Create Grid</button>
+  <button id="processBtn" disabled>Process Externally</button>
 
   <script>
     let imageBuffer = null;
+    let expectingImage = null;
 
     window.addEventListener("message", (e) => {
       if (e.data === "done") {
         console.log("Photopea ready");
-        if (imageBuffer === null && expectingImage === "load") {
-          window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
-        } else if (expectingImage === "post") {
+        if (expectingImage === "load" || expectingImage === "post") {
           window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
         }
       } else if (e.data instanceof ArrayBuffer) {
@@ -31,10 +31,9 @@
         const blob = new Blob([imageBuffer], { type: "image/png" });
         document.getElementById("imgArea").src = URL.createObjectURL(blob);
         document.getElementById("gridBtn").disabled = false;
+        document.getElementById("processBtn").disabled = false;
       }
     });
-
-    let expectingImage = null;
 
     document.getElementById("loadBtn").onclick = () => {
       expectingImage = "load";
@@ -55,10 +54,28 @@
           dup.translate(i * (scaledW + gap), 0);
         }
       `;
+      expectingImage = "post";
       window.parent.postMessage(script, "*");
-      window.parent.postMessage(`
-        app.activeDocument.saveToOE("png");
-      `, "*");
+      window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
+    };
+
+    document.getElementById("processBtn").onclick = async () => {
+      if (!imageBuffer) return;
+      try {
+        const response = await fetch('http://18.208.182.120:5123/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/octet-stream' },
+          body: imageBuffer
+        });
+        if (!response.ok) {
+          throw new Error(`Server responded with ${response.status}`);
+        }
+        const processedBlob = await response.blob(); // binary result as a Blob
+        const newUrl = URL.createObjectURL(processedBlob);
+        document.getElementById("imgArea").src = newUrl;
+      } catch (err) {
+        console.error("External processing failed:", err);
+      }
     };
   </script>
 </body>
