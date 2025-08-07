@@ -68,7 +68,6 @@
         statusText.textContent = "Processing...";
         statusText.classList.remove("error");
         statusText.style.display = "block";
-
         try {
             const blob = new Blob([imageBuffer], { type: "image/png" });
             const response = await fetch('/api/resize', {
@@ -76,24 +75,34 @@
             headers: { 'Content-Type': 'image/png' },
             body: blob
             });
-            if (!response.ok) {
-            throw new Error(`Server responded with ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`Server responded with ${response.status}`);
             const processedBlob = await response.blob();
             const newUrl = URL.createObjectURL(processedBlob);
 
-            // ONLY update the plugin's image tag
+            // Show preview in plugin
             const imgElem = document.getElementById("imgArea");
             imgElem.src = newUrl;
-            imgElem.style.display = "block"; // Ensure visible
+            imgElem.style.display = "block";
+            imgElem.width = 300;
+            imgElem.height = 300;
+
+            // Also send to Photopea main panel as base64
+            const reader = new FileReader();
+            reader.onloadend = function() {
+            const base64data = reader.result;
+            // Send to main Photopea panel
+            window.parent.postMessage(
+                `app.open("${base64data}");`,
+                "*"
+            );
+            };
+            reader.readAsDataURL(processedBlob);
 
             statusText.textContent = "Process is done";
             setTimeout(() => {
             statusText.textContent = "";
             statusText.style.display = "none";
             }, 2000);
-
-            // Extra debug (remove after test)
             console.log("imgArea.src set to:", imgElem.src);
         } catch (err) {
             console.error("External processing failed:", err);
