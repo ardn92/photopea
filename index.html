@@ -93,7 +93,7 @@
       object-fit: contain;
       border: 1.3px solid #e2e6ed;
       margin: 0 auto 0 auto;
-      display: block;
+      display: none; /* Hidden by default */
       transition: max-width 0.15s, max-height 0.15s;
     }
     #statusText {
@@ -152,8 +152,14 @@
     let imageBuffer = null;
     let expectingImage = null;
     const statusText = document.getElementById("statusText");
+    const imgElem = document.getElementById("imgArea");
 
-    // Enable or disable all processing buttons
+    // Hide the image on startup
+    window.onload = () => {
+      imgElem.style.display = "none";
+    };
+
+    // Utility: Enable or disable all processing buttons
     function setProcessingButtons(enabled) {
       document.getElementById("gridBtn").disabled = !enabled;
       document.getElementById("downsizeBtn").disabled = !enabled;
@@ -170,7 +176,8 @@
       } else if (e.data instanceof ArrayBuffer) {
         imageBuffer = e.data;
         const blob = new Blob([imageBuffer], { type: "image/png" });
-        document.getElementById("imgArea").src = URL.createObjectURL(blob);
+        imgElem.src = URL.createObjectURL(blob);
+        imgElem.style.display = "block";
         setProcessingButtons(true);
         statusText.textContent = "";
       }
@@ -179,6 +186,9 @@
     document.getElementById("loadBtn").onclick = () => {
       expectingImage = "load";
       window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
+      // Hide image until loaded
+      imgElem.style.display = "none";
+      setProcessingButtons(false);
     };
 
     document.getElementById("gridBtn").onclick = () => {
@@ -219,7 +229,6 @@
         const newUrl = URL.createObjectURL(processedBlob);
 
         // Preview in plugin panel
-        const imgElem = document.getElementById("imgArea");
         imgElem.src = newUrl;
         imgElem.style.display = "block";
 
@@ -248,6 +257,7 @@
           statusText.textContent = "";
           statusText.style.display = "none";
         }, 3000);
+        imgElem.style.display = "none"; // Hide image on error
         setProcessingButtons(true);
       }
     }
