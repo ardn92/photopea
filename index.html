@@ -2,31 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Grayscale Plugin</title>
+  <title>Amirs Grayscale Plugin</title>
   <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin: 0;
-      height: 100vh;
-      font-family: sans-serif;
-    }
-    button {
-      padding: 12px 24px;
-      font-size: 16px;
-      cursor: pointer;
-    }
+    body { display: flex; flex-direction: column; align-items: center; justify-content: center;
+          height: 100vh; margin: 0; font-family: sans-serif; }
+    button { padding: 12px 24px; font-size: 16px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h2>Grayscale Plugin</h2>
-  <button id="grayBtn">Convert to Grayscale</button>
+  <h2>Amirs Grayscale Plugin</h2>
+  <button id="grayBtn">Duplicate & Grayscale</button>
 
   <script>
-    window.addEventListener("message", e => {
-      if (e.data === "done") console.log("Plugin loaded, Photopea is ready.");
+    window.addEventListener("message", (e) => {
+      if (e.data === "done") console.log("Photopea ready");
     });
 
     document.getElementById("grayBtn").onclick = () => {
