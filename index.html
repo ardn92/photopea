@@ -62,13 +62,19 @@
     document.getElementById("processBtn").onclick = async () => {
     if (!imageBuffer) return;
     try {
-        const response = await fetch('/process', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/octet-stream' },
-        body: imageBuffer
+        // Wrap the imageBuffer (ArrayBuffer) in a Blob
+        const blob = new Blob([imageBuffer], { type: "image/png" }); // Use "image/jpeg" if your images are jpeg
+
+        // (Optional for debugging: Preview what is being sent)
+        // window.open(URL.createObjectURL(blob));
+
+        const response = await fetch('/api/resize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'image/png' }, // or 'image/jpeg' or 'application/octet-stream'
+            body: blob
         });
         if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}`);
+            throw new Error(`Server responded with ${response.status}`);
         }
         const processedBlob = await response.blob();
         const newUrl = URL.createObjectURL(processedBlob);
@@ -77,6 +83,7 @@
         console.error("External processing failed:", err);
     }
     };
+
   </script>
 </body>
 </html>

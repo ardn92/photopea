@@ -1,5 +1,5 @@
 [[redirects]]
-  from = "/process/*"
+  from = "/api/*"
   to = "http://18.208.182.120:5123/:splat"
   status = 200
   force = true
