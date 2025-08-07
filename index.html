@@ -14,7 +14,7 @@
       font-family: sans-serif;
     }
     button {
-      margin-top: 20px;
+      margin: 8px 0;
       padding: 10px 20px;
       font-size: 16px;
       cursor: pointer;
@@ -23,21 +23,18 @@
 </head>
 <body>
   <h2>Amirs Photopea Plugin</h2>
-  <button id="doubleBtn">Duplicate & Double Size</button>
+  <button id="doubleColor">Duplicate & Shift Color</button>
 
   <script>
-    // Initialize upon Photopea ready signal
     window.addEventListener("message", e => {
-      if (e.data === "done") {
-        console.log("Photopea is ready.");
-      }
+      if (e.data === "done") console.log("Photopea ready");
     });
 
-    document.getElementById("doubleBtn").onclick = () => {
+    document.getElementById("doubleColor").onclick = () => {
       const script = `
-        var original = app.activeDocument.activeLayer;
-        var dup = original.duplicate();
-        dup.resize(200, 200, AnchorPosition.MIDDLECENTER);
+        var dup = app.activeDocument.activeLayer.duplicate();
+        // Apply Hue/Saturation adjustment on the duplicate
+        var adj = dup.adjustHueSaturation(30, -20, 0);
       `;
       window.parent.postMessage(script, "*");
     };
