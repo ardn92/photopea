@@ -2,20 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Amirs Photopea Plugin: Mini Grid</title>
+  <title>Amirs Plugin: Mini Grid + Preview</title>
   <style>
     body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      font-family: sans-serif;
     }
-    h2 {
-      margin-bottom: 16px;
+    #preview {
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      max-width: 200px;
+      max-height: 200px;
+      object-fit: contain;
     }
     button {
       padding: 10px 20px;
@@ -25,18 +27,24 @@
   </style>
 </head>
 <body>
-  <h2>Amirs Plugin: Create Mini Grid</h2>
+  <h2>Amirs Plugin</h2>
+  <img id="preview" alt="Current Image Preview">
   <button id="miniGridBtn">Create Mini Grid</button>
 
   <script>
     window.addEventListener("message", (e) => {
+      // Photopea signals it's ready
       if (e.data === "done") {
-        console.log("Photopea is ready");
+        console.log("Photopea ready; requesting preview...");
+        window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
+      } else if (e.data instanceof ArrayBuffer) {
+        // Received binary image data
+        const blob = new Blob([e.data], { type: "image/png" });
+        document.getElementById("preview").src = URL.createObjectURL(blob);
       }
     });
 
     document.getElementById("miniGridBtn").onclick = () => {
-      // Duplicate, shrink, and align multiples of the active layer
       const script = `
         var doc = app.activeDocument;
         var orig = doc.activeLayer;
@@ -47,8 +55,7 @@
         for (var i = 0; i < copies; i++) {
           var dup = orig.duplicate();
           dup.resize(25, 25, AnchorPosition.TOPLEFT);
-          var dx = i * (scaledW + gap);
-          dup.translate(dx, 0);
+          dup.translate(i * (scaledW + gap), 0);
         }
       `;
       window.parent.postMessage(script, "*");
