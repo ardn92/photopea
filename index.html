@@ -2,54 +2,51 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Amirs Plugin: Mini Grid + Preview</title>
+  <title>Amirs Plugin: Grid + Image Flow</title>
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    #preview {
-      border: 1px solid #ccc;
-      margin-bottom: 10px;
-      max-width: 200px;
-      max-height: 200px;
-      object-fit: contain;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
+    body { font-family: sans-serif; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+    img { border: 1px solid #ccc; margin: 10px 0; max-width: 300px; object-fit: contain; }
+    button { margin: 5px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
   </style>
 </head>
 <body>
   <h2>Amirs Plugin</h2>
-  <img id="preview" alt="Current Image Preview">
-  <button id="miniGridBtn">Create Mini Grid</button>
+  <button id="load">Load Image</button>
+  <img id="display" alt="Loaded Image">
+  <button id="create">Create Grid</button>
+  <button id="post">Post Image</button>
+  <img id="posted" alt="Posted Image">
 
   <script>
-    window.addEventListener("message", (e) => {
-      // Photopea signals it's ready
+    let loaded = false;
+
+    window.addEventListener("message", e => {
       if (e.data === "done") {
-        console.log("Photopea ready; requesting preview...");
-        window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
+        console.log("Photopea ready");
+        if (loaded) {
+          window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
+        }
       } else if (e.data instanceof ArrayBuffer) {
-        // Received binary image data
         const blob = new Blob([e.data], { type: "image/png" });
-        document.getElementById("preview").src = URL.createObjectURL(blob);
+        const url = URL.createObjectURL(blob);
+        if (!loaded) {
+          document.getElementById("display").src = url;
+          loaded = true;
+        } else {
+          document.getElementById("posted").src = url;
+        }
       }
     });
 
-    document.getElementById("miniGridBtn").onclick = () => {
+    document.getElementById("load").onclick = () => {
+      window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
+    };
+
+    document.getElementById("create").onclick = () => {
       const script = `
         var doc = app.activeDocument;
         var orig = doc.activeLayer;
-        var copies = 5;
-        var gap = 10;
+        var copies = 5, gap = 10;
         var layerW = orig.bounds[2] - orig.bounds[0];
         var scaledW = layerW * 0.25;
         for (var i = 0; i < copies; i++) {
@@ -59,6 +56,11 @@
         }
       `;
       window.parent.postMessage(script, "*");
+    };
+
+    document.getElementById("post").onclick = () => {
+      window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
+      loaded = true;
     };
   </script>
 </body>
