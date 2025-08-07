@@ -2,34 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rename Layer Plugin</title>
+  <title>Amirs Photopea Plugin</title>
   <style>
     body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: sans-serif; }
-    input, button { margin: 8px; padding: 8px; font-size: 16px; }
+    input, button { margin: 8px; padding: 8px; font-size: 16px; width: 240px; }
   </style>
 </head>
 <body>
-  <h2>Rename Active Layer</h2>
+  <h2>Amirs Photopea Plugin</h2>
   <input type="text" id="newName" placeholder="Enter new layer name">
-  <button id="renameBtn">Rename Layer</button>
+  <button id="dupBtn">Duplicate & Rename Layer</button>
 
   <script>
-    // Wait until Photopea is ready
-    window.addEventListener("message", function(e) {
+    // Ready signal from Photopea
+    window.addEventListener("message", (e) => {
       if (e.data === "done") {
-        console.log("Photopea ready");
+        console.log("Photopea is ready");
       }
     });
 
-    document.getElementById("renameBtn").addEventListener("click", function() {
-      const name = document.getElementById("newName").value.trim();
-      if (!name) {
-        alert("Please enter a name.");
-        return;
-      }
-      const script = `app.activeDocument.activeLayer.name = "${name}";`;
+    // On button click, run duplication script
+    document.getElementById("dupBtn").onclick = () => {
+      const name = document.getElementById("newName").value.trim() || "Duplicated Layer";
+      const script = `
+        var dup = app.activeDocument.activeLayer.duplicate();
+        dup.name = "${name}";
+      `;
       window.parent.postMessage(script, "*");
-    });
+    };
   </script>
 </body>
 </html>
