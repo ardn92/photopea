@@ -2,29 +2,154 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Amirs Plugin — Load, Grid, External Process</title>
+  <title>Amirs Plugin — All Processes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; margin: 10px; display: flex; flex-direction: column; align-items: center; }
-    button { margin: 5px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
-    img { max-width: 300px; max-height: 300px; border: 1px solid #ccc; margin: 10px 0; object-fit: contain; }
-    #statusText { margin-top: 10px; color: #219653; font-weight: bold; }
-    #statusText.error { color: #c00; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #f7f7fa;
+      min-width: 250px;
+      max-width: 380px;
+    }
+    .panel {
+      width: 100%;
+      max-width: 340px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px #0001;
+      padding: 18px 14px 12px 14px;
+      margin-bottom: 16px;
+    }
+    h2 {
+      font-weight: 600;
+      margin: 8px 0 12px 0;
+      color: #3b3c45;
+      font-size: 22px;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+    h3 {
+      font-size: 17px;
+      margin: 8px 0 10px 0;
+      font-weight: 500;
+      color: #586674;
+      letter-spacing: 0.3px;
+    }
+    .row {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .col {
+      flex: 1 1 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn {
+      padding: 7px 18px;
+      margin: 4px;
+      font-size: 15px;
+      border: none;
+      border-radius: 7px;
+      background: linear-gradient(90deg, #5a8dee 40%, #37c9c6 100%);
+      color: #fff;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+      box-shadow: 0 2px 8px #0072cf13;
+    }
+    .btn:disabled {
+      background: #ccd3e0;
+      color: #9ca3b1;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    #imgArea {
+      max-width: 270px;
+      max-height: 270px;
+      border-radius: 11px;
+      box-shadow: 0 2px 10px #0088ff13;
+      background: #eaf2fb;
+      object-fit: contain;
+      border: 1.5px solid #e2e6ed;
+      margin: 0 auto 0 auto;
+      display: block;
+    }
+    #statusText {
+      margin-top: 10px;
+      color: #21a17a;
+      font-weight: 600;
+      text-align: center;
+      font-size: 15px;
+    }
+    #statusText.error {
+      color: #d10022;
+    }
+    @media (max-width: 480px) {
+      .panel { padding: 9px 4px 7px 4px; }
+      h2 { font-size: 17px; }
+      #imgArea { max-width: 180px; max-height: 180px; }
+    }
   </style>
 </head>
 <body>
   <h2>Amirs Plugin</h2>
-  <button id="loadBtn">Load Image</button>
-  <img id="imgArea" alt="Loaded Image">
-  <button id="gridBtn" disabled>Create Grid</button>
-  <button id="processBtn" disabled>Process Externally</button>
-  <div id="statusText"></div>
+
+  <!-- Row 1: Image Display -->
+  <div class="panel" style="margin-bottom:8px;">
+    <img id="imgArea" alt="Loaded Image" src="" />
+    <div id="statusText"></div>
+  </div>
+
+  <!-- Row 2: Load Image -->
+  <div class="panel row" style="justify-content:center;">
+    <button class="btn" id="loadBtn">Load Image</button>
+  </div>
+
+  <!-- Row 3: Script Processes -->
+  <div class="panel">
+    <h3>Script processes</h3>
+    <div class="row">
+      <button class="btn" id="gridBtn" disabled>Create Grid</button>
+    </div>
+  </div>
+
+  <!-- Row 4: External Processes -->
+  <div class="panel">
+    <h3>External processes</h3>
+    <div class="row" style="flex-wrap:wrap;gap:10px;">
+      <button class="btn" id="downsizeBtn" disabled>Downsize</button>
+      <button class="btn" id="enlargeBtn" disabled>Enlarge</button>
+      <button class="btn" id="grayBtn" disabled>Grayscale</button>
+      <button class="btn" id="cropBtn" disabled>Crop Center</button>
+    </div>
+  </div>
+
   <script>
     let imageBuffer = null;
     let expectingImage = null;
+    const statusText = document.getElementById("statusText");
+
+    // Utility: Enable or disable all processing buttons
+    function setProcessingButtons(enabled) {
+      document.getElementById("gridBtn").disabled = !enabled;
+      document.getElementById("downsizeBtn").disabled = !enabled;
+      document.getElementById("enlargeBtn").disabled = !enabled;
+      document.getElementById("grayBtn").disabled = !enabled;
+      document.getElementById("cropBtn").disabled = !enabled;
+    }
 
     window.addEventListener("message", (e) => {
       if (e.data === "done") {
-        console.log("Photopea ready");
         if (expectingImage === "load" || expectingImage === "post") {
           window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
         }
@@ -32,9 +157,8 @@
         imageBuffer = e.data;
         const blob = new Blob([imageBuffer], { type: "image/png" });
         document.getElementById("imgArea").src = URL.createObjectURL(blob);
-        document.getElementById("gridBtn").disabled = false;
-        document.getElementById("processBtn").disabled = false;
-        document.getElementById("statusText").textContent = ""; // Clear status
+        setProcessingButtons(true);
+        statusText.textContent = "";
       }
     });
 
@@ -62,58 +186,63 @@
       window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
     };
 
-    document.getElementById("processBtn").onclick = async () => {
-        if (!imageBuffer) return;
-        const statusText = document.getElementById("statusText");
-        statusText.textContent = "Processing...";
-        statusText.classList.remove("error");
-        statusText.style.display = "block";
-        try {
-            const blob = new Blob([imageBuffer], { type: "image/png" });
-            const response = await fetch('/api/resize', {
-            method: 'POST',
-            headers: { 'Content-Type': 'image/png' },
-            body: blob
-            });
-            if (!response.ok) throw new Error(`Server responded with ${response.status}`);
-            const processedBlob = await response.blob();
-            const newUrl = URL.createObjectURL(processedBlob);
+    // Handles external processing
+    async function processExternal(endpoint) {
+      if (!imageBuffer) return;
+      statusText.textContent = "Processing...";
+      statusText.classList.remove("error");
+      statusText.style.display = "block";
+      setProcessingButtons(false);
 
-            // Show preview in plugin
-            const imgElem = document.getElementById("imgArea");
-            imgElem.src = newUrl;
-            imgElem.style.display = "block";
-            imgElem.width = 300;
-            imgElem.height = 300;
+      try {
+        const blob = new Blob([imageBuffer], { type: "image/png" });
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'image/png' },
+          body: blob
+        });
+        if (!response.ok) throw new Error(`Server responded with ${response.status}`);
+        const processedBlob = await response.blob();
+        const newUrl = URL.createObjectURL(processedBlob);
 
-            // Also send to Photopea main panel as base64
-            const reader = new FileReader();
-            reader.onloadend = function() {
-            const base64data = reader.result;
-            // Send to main Photopea panel
-            window.parent.postMessage(
-                `app.open("${base64data}");`,
-                "*"
-            );
-            };
-            reader.readAsDataURL(processedBlob);
+        // Update preview in plugin
+        const imgElem = document.getElementById("imgArea");
+        imgElem.src = newUrl;
+        imgElem.style.display = "block";
 
-            statusText.textContent = "Process is done";
-            setTimeout(() => {
-            statusText.textContent = "";
-            statusText.style.display = "none";
-            }, 2000);
-            console.log("imgArea.src set to:", imgElem.src);
-        } catch (err) {
-            console.error("External processing failed:", err);
-            statusText.textContent = "Process failed: " + err.message;
-            statusText.classList.add("error");
-            setTimeout(() => {
-            statusText.textContent = "";
-            statusText.style.display = "none";
-            }, 4000);
-        }
+        // Update main Photopea panel with new image
+        const reader = new FileReader();
+        reader.onloadend = function() {
+          const base64data = reader.result;
+          window.parent.postMessage(
+            `app.open("${base64data}");`,
+            "*"
+          );
         };
+        reader.readAsDataURL(processedBlob);
+
+        statusText.textContent = "Process is done";
+        setTimeout(() => {
+          statusText.textContent = "";
+          statusText.style.display = "none";
+        }, 1500);
+        setProcessingButtons(true);
+      } catch (err) {
+        console.error("External processing failed:", err);
+        statusText.textContent = "Process failed: " + err.message;
+        statusText.classList.add("error");
+        setTimeout(() => {
+          statusText.textContent = "";
+          statusText.style.display = "none";
+        }, 4000);
+        setProcessingButtons(true);
+      }
+    }
+
+    document.getElementById("downsizeBtn").onclick = () => processExternal('/api/resize');
+    document.getElementById("enlargeBtn").onclick = () => processExternal('/api/enlarge');
+    document.getElementById("grayBtn").onclick = () => processExternal('/api/grayscale');
+    document.getElementById("cropBtn").onclick = () => processExternal('/api/crop_center');
   </script>
 </body>
 </html>
