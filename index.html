@@ -2,26 +2,54 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Amirs Grayscale Plugin</title>
+  <title>Amirs Photopea Plugin: Mini Grid</title>
   <style>
-    body { display: flex; flex-direction: column; align-items: center; justify-content: center;
-          height: 100vh; margin: 0; font-family: sans-serif; }
-    button { padding: 12px 24px; font-size: 16px; cursor: pointer; }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      font-family: sans-serif;
+    }
+    h2 {
+      margin-bottom: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <h2>Amirs Grayscale Plugin</h2>
-  <button id="grayBtn">Duplicate & Grayscale</button>
+  <h2>Amirs Plugin: Create Mini Grid</h2>
+  <button id="miniGridBtn">Create Mini Grid</button>
 
   <script>
     window.addEventListener("message", (e) => {
-      if (e.data === "done") console.log("Photopea ready");
+      if (e.data === "done") {
+        console.log("Photopea is ready");
+      }
     });
 
-    document.getElementById("grayBtn").onclick = () => {
+    document.getElementById("miniGridBtn").onclick = () => {
+      // Duplicate, shrink, and align multiples of the active layer
       const script = `
-        var dup = app.activeDocument.activeLayer.duplicate();
-        dup.adjustHueSaturation(0, -100, 0);
+        var doc = app.activeDocument;
+        var orig = doc.activeLayer;
+        var copies = 5;
+        var gap = 10;
+        var layerW = orig.bounds[2] - orig.bounds[0];
+        var scaledW = layerW * 0.25;
+        for (var i = 0; i < copies; i++) {
+          var dup = orig.duplicate();
+          dup.resize(25, 25, AnchorPosition.TOPLEFT);
+          var dx = i * (scaledW + gap);
+          dup.translate(dx, 0);
+        }
       `;
       window.parent.postMessage(script, "*");
     };
