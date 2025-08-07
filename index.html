@@ -2,65 +2,69 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Amirs Plugin: Grid + Image Flow</title>
+  <title>Amirs Plugin — Load, Grid, Post</title>
   <style>
-    body { font-family: sans-serif; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-    img { border: 1px solid #ccc; margin: 10px 0; max-width: 300px; object-fit: contain; }
+    body { font-family: sans-serif; margin: 10px; display: flex; flex-direction: column; align-items: center; }
     button { margin: 5px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
+    img { max-width: 300px; max-height: 300px; border: 1px solid #ccc; margin: 10px 0; object-fit: contain; }
   </style>
 </head>
 <body>
   <h2>Amirs Plugin</h2>
-  <button id="load">Load Image</button>
-  <img id="display" alt="Loaded Image">
-  <button id="create">Create Grid</button>
-  <button id="post">Post Image</button>
-  <img id="posted" alt="Posted Image">
+  <button id="loadBtn">Load Image</button>
+  <img id="imgArea" alt="Loaded Image">
+  <button id="gridBtn" disabled>Create Grid</button>
+  <button id="postBtn" disabled>Post Image</button>
 
   <script>
-    let loaded = false;
+    let imageBuffer = null;
 
-    window.addEventListener("message", e => {
+    window.addEventListener("message", (e) => {
       if (e.data === "done") {
         console.log("Photopea ready");
-        if (loaded) {
+        if (imageBuffer === null && expectingImage === "load") {
+          window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
+        } else if (expectingImage === "post") {
           window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
         }
       } else if (e.data instanceof ArrayBuffer) {
-        const blob = new Blob([e.data], { type: "image/png" });
-        const url = URL.createObjectURL(blob);
-        if (!loaded) {
-          document.getElementById("display").src = url;
-          loaded = true;
-        } else {
-          document.getElementById("posted").src = url;
-        }
+        imageBuffer = e.data;
+        const blob = new Blob([imageBuffer], { type: "image/png" });
+        document.getElementById("imgArea").src = URL.createObjectURL(blob);
+        document.getElementById("gridBtn").disabled = false;
+        document.getElementById("postBtn").disabled = false;
       }
     });
 
-    document.getElementById("load").onclick = () => {
+    let expectingImage = null;
+
+    document.getElementById("loadBtn").onclick = () => {
+      expectingImage = "load";
       window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
     };
 
-    document.getElementById("create").onclick = () => {
+    document.getElementById("gridBtn").onclick = () => {
+      if (!imageBuffer) return;
       const script = `
         var doc = app.activeDocument;
-        var orig = doc.activeLayer;
-        var copies = 5, gap = 10;
-        var layerW = orig.bounds[2] - orig.bounds[0];
-        var scaledW = layerW * 0.25;
-        for (var i = 0; i < copies; i++) {
-          var dup = orig.duplicate();
-          dup.resize(25, 25, AnchorPosition.TOPLEFT);
+        var layer = doc.activeLayer;
+        var count = 5, gap = 10;
+        var w = layer.bounds[2] - layer.bounds[0];
+        var scaledW = w * 0.2;
+        for (var i = 0; i < count; i++) {
+          var dup = layer.duplicate();
+          dup.resize(20, 20, AnchorPosition.TOPLEFT);
           dup.translate(i * (scaledW + gap), 0);
         }
       `;
       window.parent.postMessage(script, "*");
     };
 
-    document.getElementById("post").onclick = () => {
-      window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
-      loaded = true;
+    document.getElementById("postBtn").onclick = () => {
+      expectingImage = "post";
+      window.parent.postMessage(`
+        app.activeDocument.saveToOE("png");
+      `, "*");
     };
   </script>
 </body>
