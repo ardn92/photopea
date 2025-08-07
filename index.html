@@ -7,6 +7,8 @@
     body { font-family: sans-serif; margin: 10px; display: flex; flex-direction: column; align-items: center; }
     button { margin: 5px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
     img { max-width: 300px; max-height: 300px; border: 1px solid #ccc; margin: 10px 0; object-fit: contain; }
+    #statusText { margin-top: 10px; color: #219653; font-weight: bold; }
+    #statusText.error { color: #c00; }
   </style>
 </head>
 <body>
@@ -15,7 +17,7 @@
   <img id="imgArea" alt="Loaded Image">
   <button id="gridBtn" disabled>Create Grid</button>
   <button id="processBtn" disabled>Process Externally</button>
-
+  <div id="statusText"></div>
   <script>
     let imageBuffer = null;
     let expectingImage = null;
@@ -32,6 +34,7 @@
         document.getElementById("imgArea").src = URL.createObjectURL(blob);
         document.getElementById("gridBtn").disabled = false;
         document.getElementById("processBtn").disabled = false;
+        document.getElementById("statusText").textContent = ""; // Clear status
       }
     });
 
@@ -60,30 +63,31 @@
     };
 
     document.getElementById("processBtn").onclick = async () => {
-    if (!imageBuffer) return;
-    try {
-        // Wrap the imageBuffer (ArrayBuffer) in a Blob
-        const blob = new Blob([imageBuffer], { type: "image/png" }); // Use "image/jpeg" if your images are jpeg
-
-        // (Optional for debugging: Preview what is being sent)
-        // window.open(URL.createObjectURL(blob));
-
+      if (!imageBuffer) return;
+      const statusText = document.getElementById("statusText");
+      statusText.textContent = "Processing...";
+      statusText.classList.remove("error");
+      try {
+        const blob = new Blob([imageBuffer], { type: "image/png" });
         const response = await fetch('/api/resize', {
-            method: 'POST',
-            headers: { 'Content-Type': 'image/png' }, // or 'image/jpeg' or 'application/octet-stream'
-            body: blob
+          method: 'POST',
+          headers: { 'Content-Type': 'image/png' },
+          body: blob
         });
         if (!response.ok) {
-            throw new Error(`Server responded with ${response.status}`);
+          throw new Error(`Server responded with ${response.status}`);
         }
         const processedBlob = await response.blob();
         const newUrl = URL.createObjectURL(processedBlob);
         document.getElementById("imgArea").src = newUrl;
-    } catch (err) {
+        statusText.textContent = "Process is done";
+        statusText.classList.remove("error");
+      } catch (err) {
         console.error("External processing failed:", err);
-    }
+        statusText.textContent = "Process failed: " + err.message;
+        statusText.classList.add("error");
+      }
     };
-
   </script>
 </body>
 </html>
