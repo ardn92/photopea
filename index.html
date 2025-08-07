@@ -33,8 +33,7 @@
     document.getElementById("doubleColor").onclick = () => {
       const script = `
         var dup = app.activeDocument.activeLayer.duplicate();
-        // Apply Hue/Saturation adjustment on the duplicate
-        var adj = dup.adjustHueSaturation(30, -20, 0);
+        dup.adjustHueSaturation(30, -20, 0);
       `;
       window.parent.postMessage(script, "*");
     };
