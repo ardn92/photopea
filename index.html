@@ -2,53 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Amirs Photopea Plugin</title>
+  <title>Rename Layer Plugin</title>
   <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      font-family: sans-serif;
-    }
-    h1 {
-      margin-bottom: 16px;
-      color: #333;
-    }
-    img {
-      width: 120px;
-      height: auto;
-      margin-bottom: 24px;
-    }
-    button {
-      padding: 12px 24px;
-      font-size: 16px;
-      cursor: pointer;
-    }
+    body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: sans-serif; }
+    input, button { margin: 8px; padding: 8px; font-size: 16px; }
   </style>
 </head>
 <body>
-  <h1>Amirs Photopea Plugin</h1>
-  <img src="assets/icon.png" alt="Plugin Icon">
-  <button id="grayscale">Grayscale Image</button>
+  <h2>Rename Active Layer</h2>
+  <input type="text" id="newName" placeholder="Enter new layer name">
+  <button id="renameBtn">Rename Layer</button>
 
   <script>
-    // Listen for initialization message from Photopea
+    // Wait until Photopea is ready
     window.addEventListener("message", function(e) {
       if (e.data === "done") {
-        console.log("Photopea is ready");
+        console.log("Photopea ready");
       }
     });
 
-    document.getElementById("grayscale").onclick = function() {
-      // Script to convert active layer to grayscale
-      const script = `
-        app.activeDocument.activeLayer.adjustHueSaturation(0, -100, 0);
-      `;
+    document.getElementById("renameBtn").addEventListener("click", function() {
+      const name = document.getElementById("newName").value.trim();
+      if (!name) {
+        alert("Please enter a name.");
+        return;
+      }
+      const script = `app.activeDocument.activeLayer.name = "${name}";`;
       window.parent.postMessage(script, "*");
-    };
+    });
   </script>
 </body>
 </html>
