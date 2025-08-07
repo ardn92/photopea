@@ -14,7 +14,6 @@
   <button id="loadBtn">Load Image</button>
   <img id="imgArea" alt="Loaded Image">
   <button id="gridBtn" disabled>Create Grid</button>
-  <button id="postBtn" disabled>Post Image</button>
 
   <script>
     let imageBuffer = null;
@@ -32,7 +31,6 @@
         const blob = new Blob([imageBuffer], { type: "image/png" });
         document.getElementById("imgArea").src = URL.createObjectURL(blob);
         document.getElementById("gridBtn").disabled = false;
-        document.getElementById("postBtn").disabled = false;
       }
     });
 
