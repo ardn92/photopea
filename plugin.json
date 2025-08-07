@@ -2,8 +2,8 @@
   "environment": {
     "plugins": [
       {
-        "name": "Amir's Photopea Plugin",
-        "url": "https://ardn92.github.io/photopea/",
+        "name": "Amirs Photopea",
+        "url": "https://ardn92.github.io/photopea/index.html",
         "icon": "===https://ardn92.github.io/photopea/assets/icon.png"
       }
     ]
