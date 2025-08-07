@@ -1,11 +1,5 @@
 {
-  "environment": {
-    "plugins": [
-      {
-        "name": "Amirs Photopea",
-        "url": "https://ardn92.github.io/photopea/index.html",
-        "icon": "===https://ardn92.github.io/photopea/assets/icon.png"
-      }
-    ]
-  }
+    "name": "Amirs Photopea",
+    "url": "https://taupe-dodol-8a3c7d.netlify.app/",
+    "icon": "===https://taupe-dodol-8a3c7d.netlify.app/assets/icon.png"
 }
