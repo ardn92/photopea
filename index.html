@@ -2,42 +2,55 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Amirs Plugin — All Processes</title>
+  <title>Amirs Plugin — Responsive</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #f5f8fb;
+    }
     body {
       font-family: 'Segoe UI', sans-serif;
-      margin: 16px;
+      width: 100vw;
+      height: 100vh;
+      min-height: 0;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: #f7f7fa;
-      min-width: 250px;
-      max-width: 380px;
+      justify-content: flex-start;
+      box-sizing: border-box;
+      overflow: hidden;
+      padding: 0;
     }
     .panel {
-      width: 100%;
-      max-width: 340px;
+      width: 98vw;
+      max-width: 410px;
+      min-width: 180px;
       background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px #0001;
-      padding: 18px 14px 12px 14px;
-      margin-bottom: 16px;
+      border-radius: 11px;
+      box-shadow: 0 3px 14px #0062a916;
+      padding: 12px 7px 10px 7px;
+      margin-bottom: 9px;
+      box-sizing: border-box;
     }
     h2 {
       font-weight: 600;
-      margin: 8px 0 12px 0;
+      margin: 12px 0 10px 0;
       color: #3b3c45;
-      font-size: 22px;
+      font-size: 20px;
       text-align: center;
       letter-spacing: 1px;
     }
     h3 {
-      font-size: 17px;
+      font-size: 16px;
       margin: 8px 0 10px 0;
       font-weight: 500;
       color: #586674;
       letter-spacing: 0.3px;
+      text-align: left;
     }
     .row {
       width: 100%;
@@ -45,18 +58,13 @@
       flex-direction: row;
       justify-content: center;
       align-items: center;
-      margin-bottom: 8px;
-    }
-    .col {
-      flex: 1 1 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 0;
     }
     .btn {
-      padding: 7px 18px;
-      margin: 4px;
+      padding: 7px 13px;
+      margin: 2.5px;
       font-size: 15px;
       border: none;
       border-radius: 7px;
@@ -66,6 +74,7 @@
       cursor: pointer;
       transition: background 0.15s;
       box-shadow: 0 2px 8px #0072cf13;
+      min-width: 90px;
     }
     .btn:disabled {
       background: #ccd3e0;
@@ -74,30 +83,35 @@
       box-shadow: none;
     }
     #imgArea {
-      max-width: 270px;
-      max-height: 270px;
-      border-radius: 11px;
+      width: 100%;
+      max-width: 340px;
+      max-height: 34vw;
+      aspect-ratio: 1 / 1;
+      border-radius: 9px;
       box-shadow: 0 2px 10px #0088ff13;
       background: #eaf2fb;
       object-fit: contain;
-      border: 1.5px solid #e2e6ed;
+      border: 1.3px solid #e2e6ed;
       margin: 0 auto 0 auto;
       display: block;
+      transition: max-width 0.15s, max-height 0.15s;
     }
     #statusText {
-      margin-top: 10px;
+      margin-top: 8px;
       color: #21a17a;
       font-weight: 600;
       text-align: center;
-      font-size: 15px;
+      font-size: 14px;
     }
-    #statusText.error {
-      color: #d10022;
-    }
-    @media (max-width: 480px) {
-      .panel { padding: 9px 4px 7px 4px; }
+    #statusText.error { color: #d10022; }
+    @media (max-width: 440px) {
+      .panel { max-width: 99vw; padding: 7px 2px 5px 2px; }
+      #imgArea { max-width: 95vw; max-height: 53vw; }
       h2 { font-size: 17px; }
-      #imgArea { max-width: 180px; max-height: 180px; }
+    }
+    @media (max-width: 340px) {
+      h3 { font-size: 14px; }
+      .btn { font-size: 13px; min-width: 70px; }
     }
   </style>
 </head>
@@ -105,7 +119,7 @@
   <h2>Amirs Plugin</h2>
 
   <!-- Row 1: Image Display -->
-  <div class="panel" style="margin-bottom:8px;">
+  <div class="panel" style="margin-bottom:5px;">
     <img id="imgArea" alt="Loaded Image" src="" />
     <div id="statusText"></div>
   </div>
@@ -117,7 +131,7 @@
 
   <!-- Row 3: Script Processes -->
   <div class="panel">
-    <h3>Script processes</h3>
+    <h3>Script processes:</h3>
     <div class="row">
       <button class="btn" id="gridBtn" disabled>Create Grid</button>
     </div>
@@ -125,8 +139,8 @@
 
   <!-- Row 4: External Processes -->
   <div class="panel">
-    <h3>External processes</h3>
-    <div class="row" style="flex-wrap:wrap;gap:10px;">
+    <h3>External processes:</h3>
+    <div class="row">
       <button class="btn" id="downsizeBtn" disabled>Downsize</button>
       <button class="btn" id="enlargeBtn" disabled>Enlarge</button>
       <button class="btn" id="grayBtn" disabled>Grayscale</button>
@@ -139,7 +153,7 @@
     let expectingImage = null;
     const statusText = document.getElementById("statusText");
 
-    // Utility: Enable or disable all processing buttons
+    // Enable or disable all processing buttons
     function setProcessingButtons(enabled) {
       document.getElementById("gridBtn").disabled = !enabled;
       document.getElementById("downsizeBtn").disabled = !enabled;
@@ -186,7 +200,6 @@
       window.parent.postMessage('app.activeDocument.saveToOE("png");', "*");
     };
 
-    // Handles external processing
     async function processExternal(endpoint) {
       if (!imageBuffer) return;
       statusText.textContent = "Processing...";
@@ -205,12 +218,12 @@
         const processedBlob = await response.blob();
         const newUrl = URL.createObjectURL(processedBlob);
 
-        // Update preview in plugin
+        // Preview in plugin panel
         const imgElem = document.getElementById("imgArea");
         imgElem.src = newUrl;
         imgElem.style.display = "block";
 
-        // Update main Photopea panel with new image
+        // Update main Photopea panel
         const reader = new FileReader();
         reader.onloadend = function() {
           const base64data = reader.result;
@@ -225,7 +238,7 @@
         setTimeout(() => {
           statusText.textContent = "";
           statusText.style.display = "none";
-        }, 1500);
+        }, 1200);
         setProcessingButtons(true);
       } catch (err) {
         console.error("External processing failed:", err);
@@ -234,7 +247,7 @@
         setTimeout(() => {
           statusText.textContent = "";
           statusText.style.display = "none";
-        }, 4000);
+        }, 3000);
         setProcessingButtons(true);
       }
     }
