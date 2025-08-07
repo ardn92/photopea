@@ -63,30 +63,41 @@
     };
 
     document.getElementById("processBtn").onclick = async () => {
-      if (!imageBuffer) return;
-      const statusText = document.getElementById("statusText");
-      statusText.textContent = "Processing...";
-      statusText.classList.remove("error");
-      try {
+    if (!imageBuffer) return;
+    const statusText = document.getElementById("statusText");
+    statusText.textContent = "Processing...";
+    statusText.classList.remove("error");
+    statusText.style.display = "block"; // Ensure it's visible during processing
+
+    try {
         const blob = new Blob([imageBuffer], { type: "image/png" });
         const response = await fetch('/api/resize', {
-          method: 'POST',
-          headers: { 'Content-Type': 'image/png' },
-          body: blob
+        method: 'POST',
+        headers: { 'Content-Type': 'image/png' },
+        body: blob
         });
         if (!response.ok) {
-          throw new Error(`Server responded with ${response.status}`);
+        throw new Error(`Server responded with ${response.status}`);
         }
         const processedBlob = await response.blob();
         const newUrl = URL.createObjectURL(processedBlob);
         document.getElementById("imgArea").src = newUrl;
         statusText.textContent = "Process is done";
-        statusText.classList.remove("error");
-      } catch (err) {
+        // Hide the message after 2 seconds
+        setTimeout(() => {
+        statusText.textContent = "";
+        statusText.style.display = "none";
+        }, 2000);
+    } catch (err) {
         console.error("External processing failed:", err);
         statusText.textContent = "Process failed: " + err.message;
         statusText.classList.add("error");
-      }
+        // Hide error after 4 seconds
+        setTimeout(() => {
+        statusText.textContent = "";
+        statusText.style.display = "none";
+        }, 4000);
+    }
     };
   </script>
 </body>
