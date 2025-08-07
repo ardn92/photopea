@@ -76,21 +76,25 @@
             headers: { 'Content-Type': 'image/png' },
             body: blob
             });
-            console.log('Fetch response status:', response.status);
             if (!response.ok) {
             throw new Error(`Server responded with ${response.status}`);
             }
             const processedBlob = await response.blob();
-            console.log('Processed blob:', processedBlob);
             const newUrl = URL.createObjectURL(processedBlob);
-            console.log('Processed image URL:', newUrl);
-            window.open(newUrl, '_blank'); // Debug: open in new tab
-            document.getElementById("imgArea").src = newUrl;
+
+            // ONLY update the plugin's image tag
+            const imgElem = document.getElementById("imgArea");
+            imgElem.src = newUrl;
+            imgElem.style.display = "block"; // Ensure visible
+
             statusText.textContent = "Process is done";
             setTimeout(() => {
             statusText.textContent = "";
             statusText.style.display = "none";
             }, 2000);
+
+            // Extra debug (remove after test)
+            console.log("imgArea.src set to:", imgElem.src);
         } catch (err) {
             console.error("External processing failed:", err);
             statusText.textContent = "Process failed: " + err.message;
