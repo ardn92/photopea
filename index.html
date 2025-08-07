@@ -60,22 +60,22 @@
     };
 
     document.getElementById("processBtn").onclick = async () => {
-      if (!imageBuffer) return;
-      try {
-        const response = await fetch('http://18.208.182.120:5123/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/octet-stream' },
-          body: imageBuffer
+    if (!imageBuffer) return;
+    try {
+        const response = await fetch('/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: imageBuffer
         });
         if (!response.ok) {
-          throw new Error(`Server responded with ${response.status}`);
+        throw new Error(`Server responded with ${response.status}`);
         }
-        const processedBlob = await response.blob(); // binary result as a Blob
+        const processedBlob = await response.blob();
         const newUrl = URL.createObjectURL(processedBlob);
         document.getElementById("imgArea").src = newUrl;
-      } catch (err) {
+    } catch (err) {
         console.error("External processing failed:", err);
-      }
+    }
     };
   </script>
 </body>
