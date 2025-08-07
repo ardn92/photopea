@@ -63,42 +63,44 @@
     };
 
     document.getElementById("processBtn").onclick = async () => {
-    if (!imageBuffer) return;
-    const statusText = document.getElementById("statusText");
-    statusText.textContent = "Processing...";
-    statusText.classList.remove("error");
-    statusText.style.display = "block"; // Ensure it's visible during processing
+        if (!imageBuffer) return;
+        const statusText = document.getElementById("statusText");
+        statusText.textContent = "Processing...";
+        statusText.classList.remove("error");
+        statusText.style.display = "block";
 
-    try {
-        const blob = new Blob([imageBuffer], { type: "image/png" });
-        const response = await fetch('/api/resize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'image/png' },
-        body: blob
-        });
-        if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}`);
+        try {
+            const blob = new Blob([imageBuffer], { type: "image/png" });
+            const response = await fetch('/api/resize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'image/png' },
+            body: blob
+            });
+            console.log('Fetch response status:', response.status);
+            if (!response.ok) {
+            throw new Error(`Server responded with ${response.status}`);
+            }
+            const processedBlob = await response.blob();
+            console.log('Processed blob:', processedBlob);
+            const newUrl = URL.createObjectURL(processedBlob);
+            console.log('Processed image URL:', newUrl);
+            window.open(newUrl, '_blank'); // Debug: open in new tab
+            document.getElementById("imgArea").src = newUrl;
+            statusText.textContent = "Process is done";
+            setTimeout(() => {
+            statusText.textContent = "";
+            statusText.style.display = "none";
+            }, 2000);
+        } catch (err) {
+            console.error("External processing failed:", err);
+            statusText.textContent = "Process failed: " + err.message;
+            statusText.classList.add("error");
+            setTimeout(() => {
+            statusText.textContent = "";
+            statusText.style.display = "none";
+            }, 4000);
         }
-        const processedBlob = await response.blob();
-        const newUrl = URL.createObjectURL(processedBlob);
-        document.getElementById("imgArea").src = newUrl;
-        statusText.textContent = "Process is done";
-        // Hide the message after 2 seconds
-        setTimeout(() => {
-        statusText.textContent = "";
-        statusText.style.display = "none";
-        }, 2000);
-    } catch (err) {
-        console.error("External processing failed:", err);
-        statusText.textContent = "Process failed: " + err.message;
-        statusText.classList.add("error");
-        // Hide error after 4 seconds
-        setTimeout(() => {
-        statusText.textContent = "";
-        statusText.style.display = "none";
-        }, 4000);
-    }
-    };
+        };
   </script>
 </body>
 </html>
